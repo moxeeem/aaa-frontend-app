@@ -1,2 +1,5 @@
 fastapi[all]
 easyocr
+torch
+torchvision
+numpy

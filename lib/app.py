@@ -6,6 +6,7 @@ from fastapi import UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import numpy as np
 
 from lib.images import PolygonDrawer
 from lib.images import image_to_img_src
@@ -20,15 +21,7 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 def get_index(request: Request) -> Response:
-    return Response(
-        content=f"""
-            <h1>Работает!</h1>
-            <p>теперь загляни в <pre>{__name__.replace(".", "/")}.py</pre></p>
-            <!-- а этот код можно удалить -->
-        """,
-        media_type="text/html",
-    )
-    # return templates.TemplateResponse(request, "index.html")
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.post("/", response_class=HTMLResponse)
@@ -41,8 +34,9 @@ def infer_model(
     try:
         image = open_image(file.file)
         draw = PolygonDrawer.from_image(image)
+        image_np = np.array(image)
         words = []
-        for coords, word, accuracy in model.readtext(image):
+        for coords, word, accuracy in model.readtext(image_np):
             draw.highlight_word(coords, word)
             cropped_word_image = draw.crop(coords)
             words.append(
